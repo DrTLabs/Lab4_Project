@@ -36,6 +36,12 @@ jobs:
           iverilog -o sim.vvp rtl/halfadder.v rtl/fulladder.v tb/fulladder_tb.v
           vvp sim.vvp | tee output.txt
           grep -q "TEST PASSED" output.txt
+          # the testbench is student-written: require all 8 distinct {A,B,Cin} vectors to be checked
+          checked=$(grep '| ok$' output.txt | awk '{print $1 $2 $3}' | sort -u | wc -l)
+          if [ "$checked" -ne 8 ]; then
+            echo "::error::Testbench checked $checked of the 8 input combinations - add all 8 test vectors"
+            exit 1
+          fi
 
   test-rippleadder:
     name: Test rippleadder
